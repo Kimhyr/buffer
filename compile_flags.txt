@@ -1,7 +1,7 @@
 -Wall
 -Wextra
 -pedantic
--std=c++20
--O2
+-std=c17
+-O3
 -I.
 -g
