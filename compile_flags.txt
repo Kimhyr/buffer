@@ -1,0 +1,7 @@
+-Wall
+-Wextra
+-pedantic
+-std=c++20
+-O2
+-I.
+-g
