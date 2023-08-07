@@ -13,7 +13,7 @@ static inline void _map_by_segment(
         struct buffer_segment_map **segment_map,
         struct buffer_page_map     *page_map)
 {
-        printf("info: mapping segment %i\n", index + 1);
+        //printf("info: mapping segment %i\n", index + 1);
         (*segment_map)->prior = &page_map->segment_maps[index - 1];
         (*segment_map)->next = &page_map->segment_maps[index + 1];
         (*segment_map)->segment = &page_map->page->segments[index];
@@ -21,7 +21,7 @@ static inline void _map_by_segment(
         *segment_map = (*segment_map)->next;
 }
 
-struct buffer *create_buffer(
+struct buffer *buffer(
         struct buffer_flags  flags,
         const char          *file_path,
         size_t               file_path_length)
@@ -33,7 +33,7 @@ struct buffer *create_buffer(
                 MAP_PRIVATE | MAP_ANON,
                 -1, 0);
 
-        printf("info: buffer allocated\n");
+        //printf("info: buffer allocated\n");
 
         // Load the file into memory.
         int fd = open(file_path, O_RDWR);
@@ -50,7 +50,7 @@ struct buffer *create_buffer(
         buffer->stats.bytes = st.st_size;
         buffer->stats.segments = ceil(buffer->stats.bytes / BUFFER_SEGMENT_CAPACITY);
 
-        printf("info: file loaded of size %lu\n", buffer->stats.bytes);
+        //printf("info: file loaded of size %lu\n", buffer->stats.bytes);
 
         // Map the file.
         struct buffer_page_map *page_map = &buffer->page_map;
@@ -68,11 +68,11 @@ struct buffer *create_buffer(
         count = floor(buffer->stats.segments / BUFFER_PAGE_CAPACITY);
 
         // Map the file by page.
-        printf("info: mapping file by page\n");
+        //printf("info: mapping file by page\n");
         for (; i < count; ++i) {
-                printf("info: mapping page %lu\n", i + 1);
+                //printf("info: mapping page %lu\n", i + 1);
                 page_map->page = &pages[i];
-                /// FIXME: #pragma GCC unroll(BUFFER_PAGE_CAPACITY - 1)
+                #pragma GCC unroll(BUFFER_PAGE_CAPACITY)
                 for (int j = 0; j < BUFFER_PAGE_CAPACITY; ++j){
                         _map_by_segment(j, &segment_map, page_map);
                 }
@@ -94,7 +94,7 @@ struct buffer *create_buffer(
 
         // Map the file by segment.
 map_file_by_segment:
-        printf("info: mapping file by segment\n");
+        //printf("info: mapping file by segment\n");
         count = buffer->stats.segments - count * BUFFER_PAGE_CAPACITY;
         for (i = 0; i < count; ++i) {
                 _map_by_segment(i, &segment_map, page_map);
@@ -104,12 +104,12 @@ map_file_by_segment:
 
         // Map the remaining bytes of the file.
 map_file_by_byte:
-        printf("info: mapping file by byte %lu\n", bytes);
+        //printf("info: mapping file by byte %lu\n", bytes);
         segment_map->segment = &page_map->page->segments[i];
         segment_map->size = bytes;
 
         // Turncating the rest of the page.
-        printf("info: turncating page\n");
+        //printf("info: turncating page\n");
         count = &page_map->segment_maps[64] - &segment_map[1];
         (void)simd_memset(&segment_map[1], 0, count);
 
@@ -122,7 +122,7 @@ after_mapping:
         // TODO: Initiate cursors
 
         // Set the remaining fields.
-        printf("info: setting remaining fields\n");
+        //printf("info: setting remaining fields\n");
         buffer->flags = flags;
         buffer->file_path_length = file_path_length;
         (void)simd_memcpy(

@@ -97,7 +97,7 @@ struct buffer
         char file_path[1];
 };
 
-struct buffer *create_buffer(
+struct buffer *buffer(
         struct buffer_flags flags,
         const char         *file_path,
         size_t              file_path_length);

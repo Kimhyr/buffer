@@ -1,0 +1,3 @@
+buffer():
+	Time: [1689 ns, 2156 ns]
+	CPU : [1684 ns, 2149 ns]

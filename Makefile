@@ -1,40 +1,47 @@
-BUILDMODE := debug
+#
+# INFO: If you want to perform benchmarks, uncomment the following line.
+#DO_BENCHMARK :=
 
-CC := clang++
+#
+# INFO: `BUILD_MODE` can be either release (default) or debug.
+BUILD_MODE := release
+
+CC := $(if $(shell which ccache),ccache) clang++
 CFLAGS := \
 	-Wall -Wextra -pedantic \
 	-std=c++20 \
-	-O2 \
-	-I.
+	-O3 \
+	-I. \
+	$(ifdef DO_BENCHMARK,-DBENCHMARK)
 
-ifeq ($(BUILDMODE),debug)
+ifeq ($(BUILD_MODE),debug)
 CFLAGS += -g
 else
 CFLAGS += -DNDEBUG
 endif
 
 LD := $(CC)
-LDFLAGS :=
+LDFLAGS := $(ifdef DO_BENCHMARK,-lbenchmark)
 
-BUILDPATH := build
-OBJECTSPATH := $(BUILDPATH)/.objects
-PATHS := $(BUILDPATH) $(OBJECTSPATH)
+BUILD_PATH := build
+OBJECTS_PATH := $(BUILD_PATH)/.objects
+PATHS := $(BUILD_PATH) $(OBJECTS_PATH)
 
-TARGET := $(BUILDPATH)/buffer
+TARGET := $(BUILD_PATH)/buffer
 SOURCES := $(wildcard source/*.cc)
-OBJECTS := $(patsubst source/%.cc,$(OBJECTSPATH)/%.o,$(SOURCES))
+OBJECTS := $(patsubst source/%.cc,$(OBJECTS_PATH)/%.o,$(SOURCES))
 
-.PHONY: all
-all: $(PATHS) $(TARGET)
+.PHONY: default
+default: $(PATHS) $(TARGET)
 
 $(TARGET): $(OBJECTS)
-	$(LD) $(LDFLAGS) -o $@ $^ 
+	$(LD) $(LDFLAGS) -o $@ $^
 
-$(OBJECTSPATH)/%.o: source/%.cc
+$(OBJECTS_PATH)/%.o: source/%.cc
 	$(CC) $(CFLAGS) -o $@ -c $^
 
 $(PATHS):
-	mkdir -p $@ $(OBJECTSPATH)
+	mkdir -p $@ $(OBJECTS_PATH)
 
 EMPTY := 
 SPACE := $(EMPTY) $(EMPTY)
