@@ -12,24 +12,30 @@
 
 #define MEMORY_PAGE_SIZE (KIB * 4)
 
-struct memory_page
+__attribute__((always_inline))
+inline void* allocate_memory(size_t size)
 {
-        uint8_t bytes[MEMORY_PAGE_SIZE];
-};
-
-inline struct memory_page* allocate_page(
-        uint32_t count)
-{
-         return (struct memory_page*)mmap(
-                NULL, MEMORY_PAGE_SIZE * count,
-                PROT_READ | PROT_WRITE,
-                MAP_PRIVATE | MAP_ANON,
-                -1, 0);
+        return malloc(size);
 }
 
-inline int destroy_page(
-        struct memory_page* page,
-        uint32_t            count)
+__attribute__((always_inline))
+inline void free_memory(void* pointer)
+{
+        free(pointer);
+}
+
+__attribute__((always_inline))
+inline void* allocate_memory_page(size_t count)
+{
+         return mmap(NULL, MEMORY_PAGE_SIZE * count,
+                     PROT_READ | PROT_WRITE,
+                     MAP_PRIVATE | MAP_ANON,
+                     -1, 0);
+}
+
+__attribute__((always_inline))
+inline int free_memory_page(void*    page,
+                            uint32_t count)
 {
         return munmap(page, MEMORY_PAGE_SIZE * count);
 }

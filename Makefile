@@ -3,10 +3,9 @@ ENABLE_LOGGING := 1
 
 CC     := $(if $(shell which ccache),ccache) clang
 CFLAGS := \
-	-Wall -Wextra -pedantic \
-	-Wno-c11-extensions \
+	-Wall -Wextra \
 	-std=c17 \
-	-O3 \
+	-O0 \
 	-I. \
 	$(if $(ENABLE_LOGGING),-DENABLE_LOGGING) \
 	$(if $(ENABLE_DEBUG),-g,-DENABLE_DEBUG)

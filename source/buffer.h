@@ -1,98 +1,86 @@
 #ifndef BUFFER_H
 #define BUFFER_H
 
+#include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
 
 #include "memory.h"
+#include "macros.h"
 
-#define BUFFER_CAPACITY          MIB * 4
+#define BUFFER_PAGE_CAPACITY    (64)
+#define BUFFER_SEGMENT_CAPACITY (64)
 
-#define BUFFER_SEGMENT_SIZE      64
-#define BUFFER_PAGE_SIZE         64
-#define BUFFER_PAGE_MAP_CAPACITY 64
+/* A segment is a 64-byte wide line of arranged data.  Some benifets of a
+   segment is the ability to use AVX-512 SIMD instructions on one and since
+   64-bytes is the typical amount of bytes prefetch instructions prefetches,
+   prefetching is more effective. */
+typedef uint8_t          buffer_segment_t[BUFFER_SEGMENT_CAPACITY];
 
-struct buffer_segment
-{
-        uint8_t bytes[BUFFER_SEGMENT_SIZE];
-};
-
-struct buffer_page
-{
-        struct buffer_segment segments[BUFFER_PAGE_SIZE];
-};
-
-_Static_assert(sizeof(struct buffer_page) == MEMORY_PAGE_SIZE, "");
-
+/* A segment map maps a segment with the mass (the amount of bytes contained)
+   of the segment and the prior and next linked segments in the form of other
+   segment maps.  In other words, a segment map is node of a linked list while
+   a segment is the data of the linked list.  Since a segment map is 32 bytes
+   wide, it's suggested to fill a memory page with 128 segment maps. */
 struct buffer_segment_map
 {
         struct buffer_segment_map* prior;
         struct buffer_segment_map* next;
-        struct buffer_segment*     segment;
-        uint64_t                   size;
+        buffer_segment_t*          segment;
+        uint64_t                   mass;
 };
 
-struct buffer_page_map
-{
-        struct buffer_segment_map segment_maps[BUFFER_PAGE_MAP_CAPACITY];
-        struct buffer_page_map*   prior;
-        struct buffer_page_map*   next;
-        struct buffer_page*       page;
-        uint8_t                   _padding[40];
-} __attribute__((aligned(MEMORY_PAGE_SIZE)));
-
+/* These flags determine the behavior of the buffer. */
 struct buffer_flags
 {
-        uint64_t _readable : 1,
-                 writable  : 1;
+        uint64_t _readable : 1, /* This flag's sole purpose is to imitate the
+                                   `MAP_READ` `mmap` flag. */
+                 writable  : 1; /* Ability to write and erase bytes from the
+                                   buffer. */
 };
 
+/* Some statistics about the buffer. */
 struct buffer_statistics
 {
+        /* The following fields take the semantic form of, "The total number of
+           XXX." Where "XXX" is name of the variable. */
         uint64_t bytes;
         uint64_t full_segments;
-        uint64_t full_pages;
-        uint8_t  _padding[8];
+        uint64_t pages;
 };
 
+/* TODO: Explain this. */
 struct buffer
 {
-                
-        struct buffer_page_map*  page_map;
-        struct buffer_flags      flags;
-        struct buffer_statistics statistics;
+        struct buffer_segment_map* segment_map;
+        struct buffer_flags        flags;
+        struct buffer_statistics   statistics;
 
-        // File-related fields.
+        /* File-related fields. */
         int64_t     file_handle;
         uint64_t    file_path_length;
         const char* file_path;
 };
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/* Loads the file at `file_path` into the buffer.
+   Returns `-1` on failure;  otherwise, `0`. */
+int load_file_into_buffer(struct buffer*      buffer,
+                          struct buffer_flags flags,
+                          const char*         file_path,
+                          uint64_t            file_path_length);
 
-// Returns `-1` on failure;  otherwise, `0`.
-int initiate_buffer(struct buffer*      buffer,
-                    struct buffer_flags flags,
-                    const char*         file_path,
-                    uint64_t            file_path_length);
-
-// Returns `-1` on failure;  otherwise, `0`.
+/* Deallocates all the memory used by the buffer.
+   Returns `-1` on failure;  otherwise, `0`. */
 int destroy_buffer(struct buffer* buffer);
 
-// Returns `-1` on failure;  otherwise, `0`.
-int fprint_buffer(struct buffer* buffer,
-                  FILE*          file);
+/* Prints the contents of the buffer in order.
+   Returns `-1` on failure;  otherwise, the amount of bytes printed. */
+uint64_t fprint_buffer(struct buffer* buffer,
+                       FILE*          file);
 
-void traverse_buffer(struct buffer* buffer);
+uint64_t count_buffer_segments(struct buffer* buffer);
 
-uint64_t count_buffer_pages(struct buffer* buffer);
-
-#ifdef __cplusplus
-}
-#endif
-
+/* Traverses and mutates a buffer. */
 struct buffer_cursor
 {
         struct buffer*             buffer;
