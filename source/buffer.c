@@ -17,7 +17,7 @@ int initiate_buffer(struct buffer*      buffer,
                     const char*         file_path,
                     size_t              file_path_length)
 {
-        log_note("Loading the file %s into buffer...", file_path);
+        log_note("Loading the file %s into the buffer...", file_path);
         buffer->file_handle = open(file_path, O_RDWR);
         if (buffer->file_handle == -1) {
                 log_error("Failed to `open` the file.", 0);
@@ -134,7 +134,7 @@ int initiate_buffer(struct buffer*      buffer,
         simd_memset(&page_maps[page_map_count - 1], 0, MEMORY_PAGE_SIZE);
         log_note("Truncated the pages.", 0);
 
-        log_note("Loaded the file %s into buffer.", file_path);
+        log_note("Loaded the file %s into the buffer.", file_path);
      
         // Set the remaining fields.
         buffer->flags            = flags;
