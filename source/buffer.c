@@ -24,6 +24,13 @@ int load_file_into_buffer(struct buffer*      buffer,
         log_note("File opened with handle %i.", (int)buffer->file_handle);
 
         /* Get statistics. */
+        long available_memory_pages = sysconf(_SC_AVPHYS_PAGES);
+        if (available_memory_pages == -1) {
+                log_error("Failed to get available memory pages.", 0);
+                return -1;
+        }
+        log_note("Amounted %li free memory pages.", available_memory_pages);
+
         struct stat st;
         if (fstat(buffer->file_handle, &st) == -1) {
                 log_error("Failed to `fstat` the file.", 0);
@@ -36,6 +43,15 @@ int load_file_into_buffer(struct buffer*      buffer,
                  buffer->statistics.bytes,
                  buffer->statistics.full_segments,
                  buffer->statistics.pages);
+
+        uint64_t minimum_available_memory_pages = buffer->statistics.pages * 2 + 1;
+        if (minimum_available_memory_pages >= (uint64_t)available_memory_pages) {
+                log_error("Expected to have over %lu memory pages available instead of %lu.",
+                          minimum_available_memory_pages, available_memory_pages);
+                return -1;
+        }
+        log_note("Amounted over %lu available memory pages.",
+                 minimum_available_memory_pages);
 
         /* Allocate memory for segment maps. */
         buffer->segment_map = (struct buffer_segment_map*)allocate_memory_page(buffer->statistics.pages);

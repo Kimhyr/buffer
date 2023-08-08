@@ -6,11 +6,7 @@
 #include <stdint.h>
 #include <sys/mman.h>
 
-#define KIB (1024)
-#define MIB (KIB * KIB)
-#define GIB (KIB * KIB * KIB)
-
-#define MEMORY_PAGE_SIZE (KIB * 4)
+#include "constants.h"
 
 __attribute__((always_inline))
 inline void* allocate_memory(size_t size)

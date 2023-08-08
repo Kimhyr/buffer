@@ -8,7 +8,7 @@ CFLAGS := \
 	-O0 \
 	-I. \
 	$(if $(ENABLE_LOGGING),-DENABLE_LOGGING) \
-	$(if $(ENABLE_DEBUG),-g,-DENABLE_DEBUG)
+	$(if $(ENABLE_DEBUG),-g -DENABLE_DEBUG,)
 
 LD       := $(CC)
 LDFLAGS := -lm
@@ -41,6 +41,10 @@ compile_flags:
 	@for FLAG in $(CFLAGS); do \
 		echo $$FLAG >> $@.txt; \
 	done
+
+large_file:
+	dd if=/dev/zero of=large.txt bs=1048576 count=32
+	
 
 .PHONY: clean
 clean:
