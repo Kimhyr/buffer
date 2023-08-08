@@ -1,11 +1,9 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
+#include <immintrin.h>
 #include <stddef.h>
 #include <stdint.h>
-
-#include <immintrin.h>
-
 #include <sys/mman.h>
 
 #define KIB (1024)

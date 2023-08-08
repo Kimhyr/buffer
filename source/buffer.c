@@ -1,14 +1,12 @@
-#include <stdio.h>
-#include <math.h>
 #include <fcntl.h>
-#include <unistd.h>
+#include <math.h>
+#include <stdio.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #include "log.h"
 #include "simd.h"
-#include "memory.h"
-#include "error.h"
 
 #include "buffer.h"
 
@@ -152,7 +150,6 @@ int destroy_buffer(struct buffer* buffer)
                 page_map = page_map->next;
                 if (munmap(page_map->prior, MEMORY_PAGE_SIZE) == -1) {
                         log_error("Failed to `munmap` page map.", 0);
-                        merrno = 1;
                         return -1;
                 }
 
@@ -166,7 +163,6 @@ int destroy_buffer(struct buffer* buffer)
         log_note("Closing the file...", 0);
         if (close(buffer->file_handle) == -1) {
                 log_error("Failed to `munmap` page map.", 0);
-                merrno = 2;
                 return -1;
         }
 
