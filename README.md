@@ -1,3 +1,3 @@
 # Buffer
 
-A *very* performant buffer for manipulating bytes.
+A *very* performant manipulative text buffer.
