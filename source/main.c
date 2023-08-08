@@ -2,10 +2,12 @@
 
 #define PATH_PREFIX   "/home/k/projects/buffer/" 
 
-#define TEST_FILE PATH_PREFIX "large.txt"
+//#define TEST_FILE PATH_PREFIX "large.txt"
+#define TEST_FILE "/usr/include/unistd.h"
 #ifndef TEST_FILE
 #       define TEST_FILE PATH_PREFIX "source/buffer.c"
 #endif
+
 
 #include <unistd.h>
 
@@ -30,15 +32,6 @@ int main(int argc, const char** argv)
                           MEMORY_PAGE_SIZE, conf);
                 return -1;
         }
-
-        /* Get the maximum amount of opened files. */
-        conf = sysconf(_SC_OPEN_MAX);
-        if (conf == -1) {
-                log_error("Failed to `sysconf(_SC_OPEN_MAX)`.", 0);
-                return -1;
-        }
-        system_information.opened_files_limit = conf;
-        log_note("Opened files limit: %li.", conf);
 
         /* Load a file */
         struct buffer_flags flags = { .writable = 1 };

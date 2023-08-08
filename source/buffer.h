@@ -33,10 +33,12 @@ struct buffer_segment_map
 /* These flags determine the behavior of the buffer. */
 struct buffer_flags
 {
-        uint64_t _readable : 1, /* This flag's sole purpose is to imitate the
-                                   `MAP_READ` `mmap` flag. */
-                 writable  : 1; /* Ability to write and erase bytes from the
-                                   buffer. */
+        uint64_t _readable : 1,    /* This flag's sole purpose is to imitate the
+                                      `MAP_READ` `mmap` flag. */
+                 writable  : 1,    /* Ability to write and erase bytes from the
+                                      buffer. */
+                 _file_loaded : 1; /* This is set when the buffer has a file
+                                      loaded. */
 };
 
 /* Some statistics about the buffer. */
@@ -88,5 +90,10 @@ struct buffer_cursor
         uint64_t                   offset;
         uint8_t                    _padding[8];
 };
+
+/* Initializes the cursor with the given buffer.
+   Returns `-1` on failure;  otherwise, `0`. */
+int initialize_cursor(struct buffer_cursor* cursor, struct buffer* buffer);
+
 
 #endif

@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <fcntl.h>
 #include <math.h>
 #include <sys/mman.h>
@@ -16,7 +17,8 @@ int load_file_into_buffer(struct buffer*      buffer,
                           size_t              file_path_length)
 {
         /* Open the file. */
-        buffer->file_handle = open(file_path, O_RDWR);
+        *(uint64_t*)&buffer->flags = 0;
+        buffer->file_handle = open(file_path, O_RDONLY);
         if (buffer->file_handle == -1) {
                 log_error("Failed to `open` the file.", 0);
                 return -1;
@@ -136,9 +138,10 @@ done_mapping:
         log_note("Mapped file.", 0);
     
         /* Set the remaining fields. */
-        buffer->flags            = flags;
-        buffer->file_path        = file_path;
-        buffer->file_path_length = file_path_length;
+        buffer->flags              = flags;
+        buffer->file_path          = file_path;
+        buffer->file_path_length   = file_path_length;
+        buffer->flags._file_loaded = 1;
         return 0;
 }
 
@@ -178,4 +181,16 @@ uint64_t count_buffer_segments(struct buffer* buffer)
                 ++count;
         } while (segment_map != buffer->segment_map);
         return count;
+}
+
+int initialize_cursor(struct buffer_cursor* cursor, struct buffer* buffer)
+{
+        if (buffer->flags._file_loaded == 0)  {
+                return -1;
+        }
+
+        cursor->buffer      = buffer;
+        cursor->segment_map = buffer->segment_map;
+        cursor->offset      = 0;
+        return 0;
 }
