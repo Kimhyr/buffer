@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <fcntl.h>
 #include <math.h>
 #include <sys/mman.h>
@@ -7,7 +6,7 @@
 
 #include "log.h"
 #include "simd.h"
-#include "source/memory.h"
+#include "memory.h"
 
 #include "buffer.h"
 
@@ -140,6 +139,7 @@ uint64_t fprint_buffer(struct buffer* buffer,
         uint64_t count = 0;
         do {
                 volatile char c = **segment_map->segment;
+                (void)c;
                 uint64_t printed = fwrite(*segment_map->segment, 1, segment_map->mass, file);
                 if (printed != segment_map->mass) {
                         log_error("Expected to print %lu instead of %lu.",
