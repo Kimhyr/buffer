@@ -5,4 +5,5 @@
 -std=c17
 -O3
 -I.
+-DENABLE_LOGGING
 -g

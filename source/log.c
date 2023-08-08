@@ -1,4 +1,4 @@
-#ifndef NDEBUG
+#ifdef ENABLE_LOGGING
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -12,20 +12,14 @@
 #define LOG_WARNING_SUFFIX "\x1b[1;33mW"
 #define LOG_ERROR_SUFFIX   "\x1b[1;31mE"
 
-// NOTE
-// WARNING
-// FIXME:
-
-#ifndef NDEBUG
-
-void _log(
-        enum log_type type,
-        const char file[],
-        const char function[],
-        unsigned line,
-        const char format[],
-        ...)
+void _log(enum log_type type,
+          const char    file[],
+          const char    function[],
+          const char    format[],
+          ...)
 {
+#ifdef ENABLE_LOGGING
+
         time_t raw_time;
         (void)time(&raw_time);
         struct tm* time_info = localtime(&raw_time);
@@ -50,13 +44,15 @@ void _log(
                 break;
         }
         fwrite(suffix, 1, suffix_length, stderr);
-        fprintf(stderr, "\x1b[0m %s:%s:%u ", file, function, line);
+        fprintf(stderr, "\x1b[0m %s:%s: ", file, function);
         va_list args;
         va_start(args, format);
         vfprintf(stderr, format, args);
         va_end(args);
         fputc('\n', stderr);
         fflush(stderr);
+#else
+        (void)type, (void)file, (void)function, (void)format;        
+#endif
 }
 
-#endif

@@ -42,32 +42,36 @@ struct buffer_flags
                  writable  : 1;
 };
 
+struct buffer_statistics
+{
+        uint64_t bytes;
+        uint64_t full_segments;
+        uint64_t full_pages;
+        uint8_t  _padding[8];
+};
+
 struct buffer
 {
                 
-        struct buffer_page_map* page_map;
-        struct buffer_flags     flags;
-
-        // Statistical fields.
-        uint64_t byte_count;
-        uint64_t full_segment_count;
-        uint64_t full_page_count;
+        struct buffer_page_map*  page_map;
+        struct buffer_flags      flags;
+        struct buffer_statistics statistics;
 
         // File-related fields.
-        int64_t  file_handle;
-        uint64_t file_path_length;
-        uint8_t  _padding[8];
-        char     file_path[1];
+        int64_t     file_handle;
+        uint64_t    file_path_length;
+        const char* file_path __attribute__((aligned(8)));
 };
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct buffer* create_buffer(
-        struct buffer_flags flags,
-        const char*         file_path,
-        uint64_t            file_path_length);
+// Returns `-1` on failure;  otherwise, `0`.
+int initiate_buffer(struct buffer*      buffer,
+                    struct buffer_flags flags,
+                    const char*         file_path,
+                    uint64_t            file_path_length);
 
 int destroy_buffer(struct buffer* buffer);
 
