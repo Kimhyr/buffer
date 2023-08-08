@@ -8,9 +8,9 @@
 
 #include "log.h"
 
-#define LOG_NOTE_SUFFIX    "\x1b[1;36mNOTE"
-#define LOG_WARNING_SUFFIX "\x1b[1;33mWARNING"
-#define LOG_ERROR_SUFFIX   "\x1b[1;31mERROR"
+#define LOG_NOTE_SUFFIX    "\x1b[1;36mN"
+#define LOG_WARNING_SUFFIX "\x1b[1;33mW"
+#define LOG_ERROR_SUFFIX   "\x1b[1;31mE"
 
 // NOTE
 // WARNING
@@ -21,6 +21,7 @@
 void _log(
         enum log_type type,
         const char file[],
+        const char function[],
         unsigned line,
         const char format[],
         ...)
@@ -49,12 +50,13 @@ void _log(
                 break;
         }
         fwrite(suffix, 1, suffix_length, stderr);
-        fprintf(stderr, "\x1b[0m %s:%u: ", file, line);
+        fprintf(stderr, "\x1b[0m %s:%s:%u ", file, function, line);
         va_list args;
         va_start(args, format);
         vfprintf(stderr, format, args);
         va_end(args);
         fputc('\n', stderr);
+        fflush(stderr);
 }
 
 #endif

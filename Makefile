@@ -1,6 +1,6 @@
 #
-# INFO: If you want to perform benchmarks, set this to 1.
-# DO_BENCHMARK := 1
+# INFO: If you want to enable logs, set this to 1.
+ENABLE_LOGGING := 1
 
 #
 # INFO: `BUILD_MODE` can be either release (default) or debug.
@@ -9,10 +9,11 @@ BUILD_MODE := debug
 CC := $(if $(shell which ccache),ccache) clang
 CFLAGS := \
 	-Wall -Wextra -pedantic \
+	-Wno-c11-extensions \
 	-std=c17 \
 	-O3 \
 	-I. \
-	$(if $(DO_BENCHMARK),-DBENCHMARK)
+	$(if $(ENABLE_LOGGING),-DENABLE_LOGGING)
 
 ifeq ($(BUILD_MODE),debug)
 CFLAGS += -g
@@ -21,7 +22,7 @@ CFLAGS += -DNDEBUG
 endif
 
 LD := $(CC)
-LDFLAGS := $(if $(DO_BENCHMARK),-lbenchmark)
+LDFLAGS := -lm
 
 BUILD_PATH := build
 OBJECTS_PATH := $(BUILD_PATH)/.objects

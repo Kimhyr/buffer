@@ -1,6 +1,7 @@
 -Wall
 -Wextra
 -pedantic
+-Wno-c11-extensions
 -std=c17
 -O3
 -I.
