@@ -2,22 +2,27 @@
 #define BUFFER_H
 
 #include <stdint.h>
+#include <stdio.h>
 
 #include "memory.h"
 
-#define BUFFER_SEGMENT_SIZE  64
-#define BUFFER_PAGE_SIZE     64
-#define BUFFER_PAGE_MAP_SIZE 64
+#define BUFFER_CAPACITY          MIB * 4
+
+#define BUFFER_SEGMENT_SIZE      64
+#define BUFFER_PAGE_SIZE         64
+#define BUFFER_PAGE_MAP_CAPACITY 64
 
 struct buffer_segment
 {
         uint8_t bytes[BUFFER_SEGMENT_SIZE];
-} __attribute__((aligned(MEMORY_PAGE_SIZE / BUFFER_SEGMENT_SIZE)));
+};
 
 struct buffer_page
 {
         struct buffer_segment segments[BUFFER_PAGE_SIZE];
-} __attribute__((aligned(MEMORY_PAGE_SIZE)));
+};
+
+_Static_assert(sizeof(struct buffer_page) == MEMORY_PAGE_SIZE, "");
 
 struct buffer_segment_map
 {
@@ -25,16 +30,16 @@ struct buffer_segment_map
         struct buffer_segment_map* next;
         struct buffer_segment*     segment;
         uint64_t                   size;
-} __attribute__((aligned(32)));
+};
 
 struct buffer_page_map
 {
-        struct buffer_segment_map segment_maps[BUFFER_PAGE_MAP_SIZE];
+        struct buffer_segment_map segment_maps[BUFFER_PAGE_MAP_CAPACITY];
         struct buffer_page_map*   prior;
         struct buffer_page_map*   next;
         struct buffer_page*       page;
         uint8_t                   _padding[40];
-} __attribute__((aligned(BUFFER_PAGE_MAP_SIZE)));
+} __attribute__((aligned(MEMORY_PAGE_SIZE)));
 
 struct buffer_flags
 {
@@ -60,7 +65,7 @@ struct buffer
         // File-related fields.
         int64_t     file_handle;
         uint64_t    file_path_length;
-        const char* file_path __attribute__((aligned(8)));
+        const char* file_path;
 };
 
 #ifdef __cplusplus
@@ -73,7 +78,16 @@ int initiate_buffer(struct buffer*      buffer,
                     const char*         file_path,
                     uint64_t            file_path_length);
 
+// Returns `-1` on failure;  otherwise, `0`.
 int destroy_buffer(struct buffer* buffer);
+
+// Returns `-1` on failure;  otherwise, `0`.
+int fprint_buffer(struct buffer* buffer,
+                  FILE*          file);
+
+void traverse_buffer(struct buffer* buffer);
+
+uint64_t count_buffer_pages(struct buffer* buffer);
 
 #ifdef __cplusplus
 }
@@ -86,10 +100,5 @@ struct buffer_cursor
         uint64_t                   offset;
         uint8_t                    _padding[8];
 };
-
-_Static_assert(sizeof(struct buffer_page) == MEMORY_PAGE_SIZE, "");
-_Static_assert(sizeof(struct buffer_page_map) == sizeof(struct buffer_segment_map[64]) + 64, "");
-_Static_assert(sizeof(struct buffer_flags) == 8, "");
-_Static_assert(sizeof(struct buffer_cursor) == sizeof(uint64_t) * 4, "");
 
 #endif

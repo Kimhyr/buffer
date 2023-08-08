@@ -9,4 +9,8 @@
 #       error "Compile for x86-64 UNIX"
 #endif
 
+#ifdef ENABLE_DEBUG
+#       define NDEBUG
+#endif
+
 #endif

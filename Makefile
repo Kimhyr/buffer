@@ -1,34 +1,24 @@
-#
-# INFO: If you want to enable logs, set this to 1.
+ENABLE_DEBUG := 1
 ENABLE_LOGGING := 1
 
-#
-# INFO: `BUILD_MODE` can be either release (default) or debug.
-BUILD_MODE := debug
-
-CC := $(if $(shell which ccache),ccache) clang
+CC     := $(if $(shell which ccache),ccache) clang
 CFLAGS := \
 	-Wall -Wextra -pedantic \
 	-Wno-c11-extensions \
 	-std=c17 \
 	-O3 \
 	-I. \
-	$(if $(ENABLE_LOGGING),-DENABLE_LOGGING)
+	$(if $(ENABLE_LOGGING),-DENABLE_LOGGING) \
+	$(if $(ENABLE_DEBUG),-g,-DENABLE_DEBUG)
 
-ifeq ($(BUILD_MODE),debug)
-CFLAGS += -g
-else
-CFLAGS += -DNDEBUG
-endif
-
-LD := $(CC)
+LD       := $(CC)
 LDFLAGS := -lm
 
-BUILD_PATH := build
+BUILD_PATH   := build
 OBJECTS_PATH := $(BUILD_PATH)/.objects
-PATHS := $(BUILD_PATH) $(OBJECTS_PATH)
+PATHS        := $(BUILD_PATH) $(OBJECTS_PATH)
 
-TARGET := $(BUILD_PATH)/buffer
+TARGET  := $(BUILD_PATH)/buffer
 SOURCES := $(wildcard source/*.c)
 OBJECTS := $(patsubst source/%.c,$(OBJECTS_PATH)/%.o,$(SOURCES))
 
