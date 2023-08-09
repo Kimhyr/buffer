@@ -2,8 +2,8 @@
 
 #define PATH_PREFIX   "/home/k/projects/buffer/" 
 
-//#define TEST_FILE PATH_PREFIX "large.txt"
-#define TEST_FILE "/usr/include/unistd.h"
+#define TEST_FILE PATH_PREFIX "large.txt"
+// #define TEST_FILE "/usr/include/unistd.h"
 #ifndef TEST_FILE
 #       define TEST_FILE PATH_PREFIX "source/buffer.c"
 #endif
