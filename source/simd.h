@@ -1,16 +1,21 @@
 #ifndef SIMD_H
 #define SIMD_H
 
-#include <memory.h>
+#include <cstddef>
 
-inline void *simd_memcpy(void*  d,
-                         void*  s,
-                         size_t n)
-{ return memcpy(d, s, n); }
+namespace simd
+{
 
-inline void *simd_memset(void*  s,
-                         char   c,
-                         size_t n)
-{ return memset(s, c, n);}
+template<typename T>
+T* memcpy(T* __restrict source,
+          T* __restrict destination,
+          std::size_t   count);
+
+template<typename T, typename U>
+T* memset(T*          source,
+          U           replacement,
+          std::size_t count);
+
+}
 
 #endif
