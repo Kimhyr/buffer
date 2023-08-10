@@ -1,15 +1,14 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
-#include <sys/mman.h>
-
 #include <cstddef>
+#include <sys/mman.h>
 
 struct memory_page
 {
     static constexpr int size = 4096;
 
-    template<typename T = void>
+    template<typename T = memory_page>
     static T* allocate(std::size_t count)
     {
          return (T*)mmap(NULL, memory_page::size * count,
@@ -20,7 +19,7 @@ struct memory_page
 
     template<typename T>
     static int deallocate(T*          page,
-                                 std::size_t count)
+                          std::size_t count)
     {
         return munmap(page, memory_page::size * count);
     }

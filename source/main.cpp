@@ -7,6 +7,7 @@
 #include <fstream>
 
 #include "buffer.h"
+#include "diagnostics.h"
 
 int main(int argc, const char** argv)
 {

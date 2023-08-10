@@ -1,11 +1,9 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
+#include <chrono>
 #include <format>
 #include <iostream>
-#include <chrono>
-#include <ctime>
-#include <cmath>
 
 #include "utilities.h"
 
@@ -16,34 +14,15 @@ enum class record_type
     failure = 31,
 };
 
-inline void _record(std::string_view file,
-                    std::size_t      line,
-                    record_type      type,
-                    std::string_view message)
-{
-    std::chrono::time_point time = std::chrono::system_clock::now();
-    std::string_view type_string;
-    switch (type) {
-    case record_type::note:
-        type_string = "note";
-        break;
-    case record_type::warning:
-        type_string = "warn";
-        break;
-    case record_type::failure:
-        type_string = "fail";
-        break;
-    }
-    std::string format = std::format(
-        "{:%X} [{}] {}:{}: {}",
-        time, type_string, file, line, message);
-    std::cerr << format << std::endl;
-}
+void _record(std::string_view file,
+             std::size_t      line,
+             record_type      type,
+             std::string_view message);
 
 template<bool Assertion>
-inline void _assert(std::string_view file,
-                    std::size_t      line,
-                    std::string_view assertion)
+void _assert(std::string_view file,
+             std::size_t      line,
+             std::string_view assertion)
 {
     if constexpr(!Assertion) {
         _record(file, line, record_type::failure, assertion);

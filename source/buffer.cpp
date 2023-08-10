@@ -3,10 +3,9 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include <cerrno>
 #include <cmath>
 
-#include "debug.h"
+#include "diagnostics.h"
 #include "memory.h"
 #include "simd.h"
 

@@ -1,9 +1,10 @@
 #ifndef BUFFER_H
 #define BUFFER_H
 
-#include <stdio.h>
+#include <cstdint>
+#include <cstdio>
+#include <string_view>
 
-#include "debug.h"
 #include "memory.h"
 
 // A segment is a 64-byte wide line of arranged data.  Some benifets of a
